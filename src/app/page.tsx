@@ -68,10 +68,45 @@ export default function Home() {
     }
     return [];
   });
+    const [dailyAverageData, setDailyAverageData] = useState({ systolic: 0, diastolic: 0, heartRate: 0 });
+
 
   useEffect(() => {
     localStorage.setItem('bpData', JSON.stringify(bpData));
   }, [bpData]);
+
+    useEffect(() => {
+        // Calculate daily average only on the client-side
+        if (typeof window !== 'undefined') {
+            const calculateDailyAverage = () => {
+                if (bpData.length === 0) return { systolic: 0, diastolic: 0, heartRate: 0 };
+
+                const dailyReadings = bpData.filter(reading => reading.date === format(date, 'yyyy-MM-dd'));
+
+                if (dailyReadings.length === 0) return { systolic: 0, diastolic: 0, heartRate: 0 };
+
+                let systolicSum = 0;
+                let diastolicSum = 0;
+                let heartRateSum = 0;
+
+                dailyReadings.forEach(reading => {
+                    systolicSum += reading.systolic;
+                    diastolicSum += reading.diastolic;
+                    heartRateSum += reading.heartRate;
+                });
+
+                const count = dailyReadings.length;
+                return {
+                    systolic: Math.round(systolicSum / count),
+                    diastolic: Math.round(diastolicSum / count),
+                    heartRate: Math.round(heartRateSum / count)
+                };
+            };
+
+            setDailyAverageData(calculateDailyAverage());
+        }
+    }, [bpData, date]);
+
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -104,32 +139,6 @@ export default function Home() {
     setSystolic2('');
     setDiastolic2('');
     setHeartRate2('');
-  };
-
-  const dailyAverage = () => {
-    if (bpData.length === 0) return { systolic: 0, diastolic: 0, heartRate: 0 };
-
-    // Filter readings for the selected date
-    const dailyReadings = bpData.filter(reading => reading.date === format(date, 'yyyy-MM-dd'));
-  
-    if (dailyReadings.length === 0) return { systolic: 0, diastolic: 0, heartRate: 0 };
-
-    let systolicSum = 0;
-    let diastolicSum = 0;
-    let heartRateSum = 0;
-
-    dailyReadings.forEach(reading => {
-        systolicSum += reading.systolic;
-        diastolicSum += reading.diastolic;
-        heartRateSum += reading.heartRate;
-    });
-
-    const count = dailyReadings.length;
-    return {
-        systolic: Math.round(systolicSum / count),
-        diastolic: Math.round(diastolicSum / count),
-        heartRate: Math.round(heartRateSum / count)
-    };
   };
 
 
@@ -259,8 +268,8 @@ export default function Home() {
         </CardHeader>
         <CardContent>
           <p>
-            انقباضي: {dailyAverage().systolic} mmHg, انبساطي:{' '}
-            {dailyAverage().diastolic} mmHg, معدل النبض: {dailyAverage().heartRate} نبضة/دقيقة
+            انقباضي: {dailyAverageData.systolic} mmHg, انبساطي:{' '}
+            {dailyAverageData.diastolic} mmHg, معدل النبض: {dailyAverageData.heartRate} نبضة/دقيقة
           </p>
         </CardContent>
       </Card>

@@ -33,8 +33,10 @@ const TIME_OPTIONS = ['Morning', 'Night'];
 export default function Home() {
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [time, setTime] = useState(TIME_OPTIONS[0]);
-  const [systolic, setSystolic] = useState('');
-  const [diastolic, setDiastolic] = useState('');
+  const [systolic1, setSystolic1] = useState('');
+  const [diastolic1, setDiastolic1] = useState('');
+  const [systolic2, setSystolic2] = useState('');
+  const [diastolic2, setDiastolic2] = useState('');
   const [bpData, setBpData] = useState<BloodPressureReading[]>(() => {
     if (typeof window !== 'undefined') {
       const storedData = localStorage.getItem('bpData');
@@ -50,21 +52,30 @@ export default function Home() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!date || !systolic || !diastolic) {
+    if (!date || !systolic1 || !diastolic1 || !systolic2 || !diastolic2) {
       alert('Please fill in all fields.');
       return;
     }
 
-    const newReading: BloodPressureReading = {
+    const newReading1: BloodPressureReading = {
       date: format(date, 'yyyy-MM-dd'),
-      time: time,
-      systolic: parseInt(systolic),
-      diastolic: parseInt(diastolic),
+      time: time + " - 1",
+      systolic: parseInt(systolic1),
+      diastolic: parseInt(diastolic1),
     };
 
-    setBpData([...bpData, newReading]);
-    setSystolic('');
-    setDiastolic('');
+    const newReading2: BloodPressureReading = {
+      date: format(date, 'yyyy-MM-dd'),
+      time: time + " - 2",
+      systolic: parseInt(systolic2),
+      diastolic: parseInt(diastolic2),
+    };
+
+    setBpData([...bpData, newReading1, newReading2]);
+    setSystolic1('');
+    setDiastolic1('');
+    setSystolic2('');
+    setDiastolic2('');
   };
 
   const dailyAverage = () => {
@@ -144,27 +155,49 @@ export default function Home() {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="systolic">Systolic</Label>
+                <Label htmlFor="systolic1">Systolic 1</Label>
                 <Input
                   type="number"
-                  id="systolic"
-                  placeholder="Systolic"
-                  value={systolic}
-                  onChange={(e) => setSystolic(e.target.value)}
+                  id="systolic1"
+                  placeholder="Systolic 1"
+                  value={systolic1}
+                  onChange={(e) => setSystolic1(e.target.value)}
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="diastolic">Diastolic</Label>
+                <Label htmlFor="diastolic1">Diastolic 1</Label>
                 <Input
                   type="number"
-                  id="diastolic"
-                  placeholder="Diastolic"
-                  value={diastolic}
-                  onChange={(e) => setDiastolic(e.target.value)}
+                  id="diastolic1"
+                  placeholder="Diastolic 1"
+                  value={diastolic1}
+                  onChange={(e) => setDiastolic1(e.target.value)}
                 />
               </div>
             </div>
-            <Button type="submit">Add Reading</Button>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="systolic2">Systolic 2</Label>
+                <Input
+                  type="number"
+                  id="systolic2"
+                  placeholder="Systolic 2"
+                  value={systolic2}
+                  onChange={(e) => setSystolic2(e.target.value)}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="diastolic2">Diastolic 2</Label>
+                <Input
+                  type="number"
+                  id="diastolic2"
+                  placeholder="Diastolic 2"
+                  value={diastolic2}
+                  onChange={(e) => setDiastolic2(e.target.value)}
+                />
+              </div>
+            </div>
+            <Button type="submit">Add Readings</Button>
           </form>
         </CardContent>
       </Card>
@@ -221,4 +254,3 @@ export default function Home() {
     </div>
   );
 }
-

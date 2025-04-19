@@ -39,9 +39,9 @@ interface CustomTooltipProps {
 
 const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
-    const systolicValue = payload[0]?.value || 0;
-    const diastolicValue = payload[1]?.value || 0;
-    const heartRateValue = payload[2]?.value || 0;
+    const systolicValue = payload[0]?.payload?.systolic || 0;
+    const diastolicValue = payload[0]?.payload?.diastolic || 0;
+    const heartRateValue = payload[0]?.payload?.heartRate || 0;
 
     return (
       <div className="p-2 bg-white border rounded shadow-md">
@@ -64,7 +64,7 @@ export default function Home() {
   const [heartRate1, setHeartRate1] = useState('');
   const [systolic2, setSystolic2] = useState('');
   const [diastolic2, setDiastolic2] = useState('');
-    const [heartRate2, setHeartRate2] = useState('');
+  const [heartRate2, setHeartRate2] = useState('');
   const [bpData, setBpData] = useState<BloodPressureReading[]>(() => {
     if (typeof window !== 'undefined') {
       const storedData = localStorage.getItem('bpData');
@@ -72,31 +72,31 @@ export default function Home() {
     }
     return [];
   });
-    const [dailyAverageData, setDailyAverageData] = useState({ systolic: 0, diastolic: 0, heartRate: 0 });
+  const [dailyAverageData, setDailyAverageData] = useState({ systolic: 0, diastolic: 0, heartRate: 0 });
 
 
   useEffect(() => {
     localStorage.setItem('bpData', JSON.stringify(bpData));
   }, [bpData]);
 
-  const calculateDailyAverage = () => {
+  const dailyAverage = () => {
     if (bpData.length === 0) return { systolic: 0, diastolic: 0, heartRate: 0 };
 
-    const dailyReadings = bpData.filter(reading => reading.date === format(date, 'yyyy-MM-dd'));
-
-    if (dailyReadings.length === 0) return { systolic: 0, diastolic: 0, heartRate: 0 };
+    const todayReadings = bpData.filter(reading => reading.date === format(date, 'yyyy-MM-dd'));
+    if (todayReadings.length === 0) return { systolic: 0, diastolic: 0, heartRate: 0 };
 
     let systolicSum = 0;
     let diastolicSum = 0;
     let heartRateSum = 0;
 
-    dailyReadings.forEach(reading => {
+    todayReadings.forEach(reading => {
       systolicSum += reading.systolic;
       diastolicSum += reading.diastolic;
       heartRateSum += reading.heartRate;
     });
 
-    const count = dailyReadings.length;
+    const count = todayReadings.length;
+
     return {
       systolic: Math.round(systolicSum / count),
       diastolic: Math.round(diastolicSum / count),
@@ -105,7 +105,7 @@ export default function Home() {
   };
 
   useEffect(() => {
-    setDailyAverageData(calculateDailyAverage());
+    setDailyAverageData(dailyAverage());
   }, [bpData, date]);
 
 
@@ -130,7 +130,7 @@ export default function Home() {
       time: time + " - 2",
       systolic: parseInt(systolic2),
       diastolic: parseInt(diastolic2),
-          heartRate: parseInt(heartRate2),
+      heartRate: parseInt(heartRate2),
     };
 
     setBpData([...bpData, newReading1, newReading2]);
@@ -148,6 +148,14 @@ export default function Home() {
     name: `${item.time} - ${item.date}`, // Combine time and date for chart labels
   }));
 
+  const removeReading = (indexToRemove: number) => {
+    setBpData(prevData => {
+      const newData = [...prevData];
+      newData.splice(indexToRemove, 1);
+      return newData;
+    });
+  };
+
   return (
     <div dir="rtl" className="container mx-auto p-4">
       <Card className="mb-4">
@@ -156,7 +164,7 @@ export default function Home() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="grid gap-4">
-             <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4">
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
@@ -215,7 +223,7 @@ export default function Home() {
                   onChange={(e) => setDiastolic1(e.target.value)}
                 />
               </div>
-                 <div className="grid gap-2">
+              <div className="grid gap-2">
                 <Label htmlFor="heartRate1">معدل النبض 1</Label>
                 <Input
                   type="number"
@@ -247,7 +255,7 @@ export default function Home() {
                   onChange={(e) => setDiastolic2(e.target.value)}
                 />
               </div>
-               <div className="grid gap-2">
+              <div className="grid gap-2">
                 <Label htmlFor="heartRate2">معدل النبض 2</Label>
                 <Input
                   type="number"
@@ -293,7 +301,7 @@ export default function Home() {
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" />
               <YAxis />
-                <Tooltip content={<CustomTooltip />} />
+              <Tooltip content={<CustomTooltip />} />
               <Legend />
               <Line
                 type="monotone"
@@ -307,7 +315,7 @@ export default function Home() {
                 stroke="hsl(var(--accent))"
                 activeDot={{ r: 8 }}
               />
-               <Line
+              <Line
                 type="monotone"
                 dataKey="heartRate"
                 stroke="hsl(var(--chart-2))"
@@ -315,9 +323,21 @@ export default function Home() {
               />
             </LineChart>
           </ResponsiveContainer>
+          <div className="mt-4">
+            {bpData.map((reading, index) => (
+              <div key={index} className="flex items-center justify-between py-2 border-b">
+                <div>
+                  {reading.time} - {reading.date}: {reading.systolic}/{reading.diastolic} ({reading.heartRate})
+                </div>
+                <Button variant="destructive" size="sm" onClick={() => removeReading(index)}>
+                  حذف
+                </Button>
+              </div>
+            ))}
+          </div>
         </CardContent>
       </Card>
-      
+
     </div>
   );
 }

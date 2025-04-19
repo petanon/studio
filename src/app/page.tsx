@@ -355,18 +355,6 @@ export default function Home() {
               <Legend />
               <Line
                 type="monotone"
-                dataKey="systolic1"
-                stroke="hsl(var(--primary))"
-                activeDot={{ r: 8 }}
-              />
-              <Line
-                type="monotone"
-                dataKey="systolic2"
-                stroke="hsl(var(--secondary))"
-                activeDot={{ r: 8 }}
-              />
-              <Line
-                type="monotone"
                 dataKey="avgSystolic"
                 stroke="hsl(var(--chart-2))"
                 activeDot={{ r: 8 }}
@@ -396,18 +384,6 @@ export default function Home() {
               <YAxis />
               <Tooltip content={<CustomTooltip />} />
               <Legend />
-              <Line
-                type="monotone"
-                dataKey="diastolic1"
-                stroke="hsl(var(--primary))"
-                activeDot={{ r: 8 }}
-              />
-              <Line
-                type="monotone"
-                dataKey="diastolic2"
-                stroke="hsl(var(--secondary))"
-                activeDot={{ r: 8 }}
-              />
                <Line
                 type="monotone"
                 dataKey="avgDiastolic"
@@ -439,18 +415,6 @@ export default function Home() {
               <YAxis />
               <Tooltip content={<CustomTooltip />} />
               <Legend />
-              <Line
-                type="monotone"
-                dataKey="heartRate1"
-                stroke="hsl(var(--primary))"
-                activeDot={{ r: 8 }}
-              />
-               <Line
-                type="monotone"
-                dataKey="heartRate2"
-                stroke="hsl(var(--secondary))"
-                activeDot={{ r: 8 }}
-              />
               <Line
                 type="monotone"
                 dataKey="avgHeartRate"

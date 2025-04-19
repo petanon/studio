@@ -22,11 +22,14 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { CalendarIcon } from "lucide-react"
 
 interface BloodPressureReading {
-  time: string;
-  systolic: number;
-  diastolic: number;
-  heartRate: number;
   date: string;
+  time: string;
+  systolic1: number;
+  diastolic1: number;
+  heartRate1: number;
+  systolic2: number;
+  diastolic2: number;
+  heartRate2: number;
 }
 
 const TIME_OPTIONS = ['الصباح', 'الليل'];
@@ -39,16 +42,12 @@ interface CustomTooltipProps {
 
 const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
-    const systolicValue = payload[0]?.payload?.systolic || 0;
-    const diastolicValue = payload[0]?.payload?.diastolic || 0;
-    const heartRateValue = payload[0]?.payload?.heartRate || 0;
-
+    const data = payload[0].payload;
     return (
       <div className="p-2 bg-white border rounded shadow-md">
         <p className="font-bold">{`${label}`}</p>
-        <p className="text-gray-700">{`انقباضي: ${systolicValue} mmHg`}</p>
-        <p className="text-gray-700">{`انبساطي: ${diastolicValue} mmHg`}</p>
-        <p className="text-gray-700">{`معدل النبض: ${heartRateValue} نبضة/دقيقة`}</p>
+        <p className="text-gray-700">{`قراءة 1 - انقباضي: ${data.systolic1} mmHg, انبساطي: ${data.diastolic1} mmHg, معدل النبض: ${data.heartRate1} نبضة/دقيقة`}</p>
+        <p className="text-gray-700">{`قراءة 2 - انقباضي: ${data.systolic2} mmHg, انبساطي: ${data.diastolic2} mmHg, معدل النبض: ${data.heartRate2} نبضة/دقيقة`}</p>
       </div>
     );
   }
@@ -86,22 +85,28 @@ export default function Home() {
     const todayReadings = bpData.filter(reading => reading.date === format(date, 'yyyy-MM-dd'));
     if (todayReadings.length === 0) return { systolic: 0, diastolic: 0, heartRate: 0 };
 
-    let systolicSum = 0;
-    let diastolicSum = 0;
-    let heartRateSum = 0;
+    let systolicSum1 = 0;
+    let diastolicSum1 = 0;
+    let heartRateSum1 = 0;
+    let systolicSum2 = 0;
+    let diastolicSum2 = 0;
+    let heartRateSum2 = 0;
 
     todayReadings.forEach(reading => {
-      systolicSum += reading.systolic;
-      diastolicSum += reading.diastolic;
-      heartRateSum += reading.heartRate;
+        systolicSum1 += reading.systolic1;
+        diastolicSum1 += reading.diastolic1;
+        heartRateSum1 += reading.heartRate1;
+        systolicSum2 += reading.systolic2;
+        diastolicSum2 += reading.diastolic2;
+        heartRateSum2 += reading.heartRate2;
     });
 
-    const count = todayReadings.length;
+    const count = todayReadings.length * 2; // Since we have two readings
 
     return {
-      systolic: Math.round(systolicSum / count),
-      diastolic: Math.round(diastolicSum / count),
-      heartRate: Math.round(heartRateSum / count)
+      systolic: Math.round((systolicSum1 + systolicSum2) / (count/2)),
+      diastolic: Math.round((diastolicSum1 + diastolicSum2) / (count/2)),
+      heartRate: Math.round((heartRateSum1 + heartRateSum2) / (count/2))
     };
   };
 
@@ -118,23 +123,18 @@ export default function Home() {
       return;
     }
 
-    const newReading1: BloodPressureReading = {
+    const newReading: BloodPressureReading = {
       date: format(date, 'yyyy-MM-dd'),
-      time: time + " - 1",
-      systolic: parseInt(systolic1),
-      diastolic: parseInt(diastolic1),
-      heartRate: parseInt(heartRate1),
+      time: time,
+      systolic1: parseInt(systolic1),
+      diastolic1: parseInt(diastolic1),
+      heartRate1: parseInt(heartRate1),
+      systolic2: parseInt(systolic2),
+      diastolic2: parseInt(diastolic2),
+      heartRate2: parseInt(heartRate2),
     };
 
-    const newReading2: BloodPressureReading = {
-      date: format(date, 'yyyy-MM-dd'),
-      time: time + " - 2",
-      systolic: parseInt(systolic2),
-      diastolic: parseInt(diastolic2),
-      heartRate: parseInt(heartRate2),
-    };
-
-    setBpData([...bpData, newReading1, newReading2]);
+    setBpData([...bpData, newReading]);
     setSystolic1('');
     setDiastolic1('');
     setHeartRate1('');
@@ -146,10 +146,13 @@ export default function Home() {
 
   const chartData = bpData.map(item => ({
     ...item,
-    name: `${item.time} - ${item.date}`, // Combine time and date for chart labels
-    systolic: item.systolic,
-    diastolic: item.diastolic,
-    heartRate: item.heartRate,
+    name: `${item.time} - ${item.date}`,
+    systolic1: item.systolic1,
+    diastolic1: item.diastolic1,
+    heartRate1: item.heartRate1,
+    systolic2: item.systolic2,
+    diastolic2: item.diastolic2,
+    heartRate2: item.heartRate2,
   }));
 
   const removeReading = (indexToRemove: number) => {
@@ -188,6 +191,17 @@ export default function Home() {
     }
   };
 
+  const getCombinedSystolic = (reading: BloodPressureReading) => {
+    return Math.round((reading.systolic1 + reading.systolic2) / 2);
+  };
+
+  const getCombinedDiastolic = (reading: BloodPressureReading) => {
+    return Math.round((reading.diastolic1 + reading.diastolic2) / 2);
+  };
+
+  const getCombinedHeartRate = (reading: BloodPressureReading) => {
+    return Math.round((reading.heartRate1 + reading.heartRate2) / 2);
+  };
 
   return (
     <div dir="rtl" className="container mx-auto p-4">
@@ -338,19 +352,19 @@ export default function Home() {
               <Legend />
               <Line
                 type="monotone"
-                dataKey="systolic"
+                dataKey="systolic1"
                 stroke="hsl(var(--primary))"
                 activeDot={{ r: 8 }}
               />
               <Line
                 type="monotone"
-                dataKey="diastolic"
+                dataKey="diastolic1"
                 stroke="hsl(var(--accent))"
                 activeDot={{ r: 8 }}
               />
               <Line
                 type="monotone"
-                dataKey="heartRate"
+                dataKey="heartRate1"
                 stroke="hsl(var(--chart-2))"
                 activeDot={{ r: 8 }}
               />
@@ -360,7 +374,7 @@ export default function Home() {
             {bpData.map((reading, index) => (
               <div key={index} className="flex items-center justify-between py-2 border-b">
                 <div>
-                  {reading.time} - {reading.date}: {reading.systolic}/{reading.diastolic} ({reading.heartRate})
+                  {reading.time} - {reading.date}: {getCombinedSystolic(reading)}/{getCombinedDiastolic(reading)} ({getCombinedHeartRate(reading)})
                 </div>
                 <Button variant="destructive" size="sm" onClick={() => removeReading(index)}>
                   حذف

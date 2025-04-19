@@ -39,12 +39,16 @@ interface CustomTooltipProps {
 
 const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
+    const systolicValue = payload[0]?.value || 0;
+    const diastolicValue = payload[1]?.value || 0;
+    const heartRateValue = payload[2]?.value || 0;
+
     return (
       <div className="p-2 bg-white border rounded shadow-md">
         <p className="font-bold">{`${label}`}</p>
-        <p className="text-gray-700">{`انقباضي: ${payload[0].value} mmHg`}</p>
-        <p className="text-gray-700">{`انبساطي: ${payload[1].value} mmHg`}</p>
-             <p className="text-gray-700">{`معدل النبض: ${payload[2].value} نبضة/دقيقة`}</p>
+        <p className="text-gray-700">{`انقباضي: ${systolicValue} mmHg`}</p>
+        <p className="text-gray-700">{`انبساطي: ${diastolicValue} mmHg`}</p>
+        <p className="text-gray-700">{`معدل النبض: ${heartRateValue} نبضة/دقيقة`}</p>
       </div>
     );
   }
@@ -75,37 +79,34 @@ export default function Home() {
     localStorage.setItem('bpData', JSON.stringify(bpData));
   }, [bpData]);
 
-    useEffect(() => {
-        // Calculate daily average only on the client-side
-        if (typeof window !== 'undefined') {
-            const calculateDailyAverage = () => {
-                if (bpData.length === 0) return { systolic: 0, diastolic: 0, heartRate: 0 };
+  const calculateDailyAverage = () => {
+    if (bpData.length === 0) return { systolic: 0, diastolic: 0, heartRate: 0 };
 
-                const dailyReadings = bpData.filter(reading => reading.date === format(date, 'yyyy-MM-dd'));
+    const dailyReadings = bpData.filter(reading => reading.date === format(date, 'yyyy-MM-dd'));
 
-                if (dailyReadings.length === 0) return { systolic: 0, diastolic: 0, heartRate: 0 };
+    if (dailyReadings.length === 0) return { systolic: 0, diastolic: 0, heartRate: 0 };
 
-                let systolicSum = 0;
-                let diastolicSum = 0;
-                let heartRateSum = 0;
+    let systolicSum = 0;
+    let diastolicSum = 0;
+    let heartRateSum = 0;
 
-                dailyReadings.forEach(reading => {
-                    systolicSum += reading.systolic;
-                    diastolicSum += reading.diastolic;
-                    heartRateSum += reading.heartRate;
-                });
+    dailyReadings.forEach(reading => {
+      systolicSum += reading.systolic;
+      diastolicSum += reading.diastolic;
+      heartRateSum += reading.heartRate;
+    });
 
-                const count = dailyReadings.length;
-                return {
-                    systolic: Math.round(systolicSum / count),
-                    diastolic: Math.round(diastolicSum / count),
-                    heartRate: Math.round(heartRateSum / count)
-                };
-            };
+    const count = dailyReadings.length;
+    return {
+      systolic: Math.round(systolicSum / count),
+      diastolic: Math.round(diastolicSum / count),
+      heartRate: Math.round(heartRateSum / count)
+    };
+  };
 
-            setDailyAverageData(calculateDailyAverage());
-        }
-    }, [bpData, date]);
+  useEffect(() => {
+    setDailyAverageData(calculateDailyAverage());
+  }, [bpData, date]);
 
 
   const handleSubmit = (e: React.FormEvent) => {

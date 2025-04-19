@@ -153,6 +153,9 @@ export default function Home() {
     systolic2: item.systolic2,
     diastolic2: item.diastolic2,
     heartRate2: item.heartRate2,
+    avgSystolic: (item.systolic1 + item.systolic2) / 2,
+    avgDiastolic: (item.diastolic1 + item.diastolic2) / 2,
+    avgHeartRate: (item.heartRate1 + item.heartRate2) / 2,
   }));
 
   const removeReading = (indexToRemove: number) => {
@@ -330,9 +333,9 @@ export default function Home() {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="mb-4">
         <CardHeader>
-          <CardTitle>اتجاهات القراءات</CardTitle>
+          <CardTitle>اتجاهات القراءات - انقباضي</CardTitle>
         </CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={400}>
@@ -358,18 +361,112 @@ export default function Home() {
               />
               <Line
                 type="monotone"
-                dataKey="diastolic1"
-                stroke="hsl(var(--accent))"
+                dataKey="systolic2"
+                stroke="hsl(var(--secondary))"
                 activeDot={{ r: 8 }}
               />
               <Line
                 type="monotone"
-                dataKey="heartRate1"
+                dataKey="avgSystolic"
                 stroke="hsl(var(--chart-2))"
                 activeDot={{ r: 8 }}
               />
             </LineChart>
           </ResponsiveContainer>
+        </CardContent>
+      </Card>
+
+      <Card className="mb-4">
+        <CardHeader>
+          <CardTitle>اتجاهات القراءات - انبساطي</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ResponsiveContainer width="100%" height={400}>
+            <LineChart
+              data={chartData}
+              margin={{
+                top: 5,
+                right: 30,
+                left: 20,
+                bottom: 5,
+              }}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip content={<CustomTooltip />} />
+              <Legend />
+              <Line
+                type="monotone"
+                dataKey="diastolic1"
+                stroke="hsl(var(--primary))"
+                activeDot={{ r: 8 }}
+              />
+              <Line
+                type="monotone"
+                dataKey="diastolic2"
+                stroke="hsl(var(--secondary))"
+                activeDot={{ r: 8 }}
+              />
+               <Line
+                type="monotone"
+                dataKey="avgDiastolic"
+                stroke="hsl(var(--chart-2))"
+                activeDot={{ r: 8 }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </CardContent>
+      </Card>
+
+      <Card className="mb-4">
+        <CardHeader>
+          <CardTitle>اتجاهات القراءات - معدل النبض</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ResponsiveContainer width="100%" height={400}>
+            <LineChart
+              data={chartData}
+              margin={{
+                top: 5,
+                right: 30,
+                left: 20,
+                bottom: 5,
+              }}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip content={<CustomTooltip />} />
+              <Legend />
+              <Line
+                type="monotone"
+                dataKey="heartRate1"
+                stroke="hsl(var(--primary))"
+                activeDot={{ r: 8 }}
+              />
+               <Line
+                type="monotone"
+                dataKey="heartRate2"
+                stroke="hsl(var(--secondary))"
+                activeDot={{ r: 8 }}
+              />
+              <Line
+                type="monotone"
+                dataKey="avgHeartRate"
+                stroke="hsl(var(--chart-2))"
+                activeDot={{ r: 8 }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>جميع القراءات</CardTitle>
+        </CardHeader>
+        <CardContent>
           <div className="mt-4">
             {bpData.map((reading, index) => (
               <div key={index} className="flex items-center justify-between py-2 border-b">

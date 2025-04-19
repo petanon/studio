@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -73,7 +73,8 @@ export default function Home() {
     return [];
   });
   const [dailyAverageData, setDailyAverageData] = useState({ systolic: 0, diastolic: 0, heartRate: 0 });
-
+  const [lastDeleted, setLastDeleted] = useState<{ reading: BloodPressureReading, index: number } | null>(null);
+  const [undoTimeoutId, setUndoTimeoutId] = useState<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     localStorage.setItem('bpData', JSON.stringify(bpData));
@@ -146,15 +147,47 @@ export default function Home() {
   const chartData = bpData.map(item => ({
     ...item,
     name: `${item.time} - ${item.date}`, // Combine time and date for chart labels
+    systolic: item.systolic,
+    diastolic: item.diastolic,
+    heartRate: item.heartRate,
   }));
 
   const removeReading = (indexToRemove: number) => {
+    const readingToRemove = bpData[indexToRemove];
     setBpData(prevData => {
       const newData = [...prevData];
       newData.splice(indexToRemove, 1);
       return newData;
     });
+
+    setLastDeleted({ reading: readingToRemove, index: indexToRemove });
+
+    if (undoTimeoutId) {
+      clearTimeout(undoTimeoutId);
+    }
+
+    const timeoutId = setTimeout(() => {
+      setLastDeleted(null);
+    }, 5000);
+
+    setUndoTimeoutId(timeoutId);
   };
+
+  const undoDelete = () => {
+    if (lastDeleted) {
+      setBpData(prevData => {
+        const newData = [...prevData];
+        newData.splice(lastDeleted.index, 0, lastDeleted.reading);
+        return newData;
+      });
+      setLastDeleted(null);
+      if (undoTimeoutId) {
+        clearTimeout(undoTimeoutId);
+        setUndoTimeoutId(null);
+      }
+    }
+  };
+
 
   return (
     <div dir="rtl" className="container mx-auto p-4">
@@ -337,7 +370,14 @@ export default function Home() {
           </div>
         </CardContent>
       </Card>
-
+      {lastDeleted && (
+        <div className="fixed bottom-4 left-4 bg-gray-200 p-4 rounded-md shadow-lg">
+          <p>تم حذف القراءة. هل تريد التراجع؟</p>
+          <Button onClick={undoDelete} variant="secondary">
+            تراجع
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

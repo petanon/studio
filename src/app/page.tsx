@@ -25,6 +25,7 @@ interface BloodPressureReading {
   time: string;
   systolic: number;
   diastolic: number;
+  heartRate: number;
   date: string;
 }
 
@@ -35,8 +36,10 @@ export default function Home() {
   const [time, setTime] = useState(TIME_OPTIONS[0]);
   const [systolic1, setSystolic1] = useState('');
   const [diastolic1, setDiastolic1] = useState('');
+  const [heartRate1, setHeartRate1] = useState('');
   const [systolic2, setSystolic2] = useState('');
   const [diastolic2, setDiastolic2] = useState('');
+    const [heartRate2, setHeartRate2] = useState('');
   const [bpData, setBpData] = useState<BloodPressureReading[]>(() => {
     if (typeof window !== 'undefined') {
       const storedData = localStorage.getItem('bpData');
@@ -52,7 +55,7 @@ export default function Home() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!date || !systolic1 || !diastolic1 || !systolic2 || !diastolic2) {
+    if (!date || !systolic1 || !diastolic1 || !systolic2 || !diastolic2 || !heartRate1 || !heartRate2) {
       alert('الرجاء ملء جميع الحقول.');
       return;
     }
@@ -62,6 +65,7 @@ export default function Home() {
       time: time + " - 1",
       systolic: parseInt(systolic1),
       diastolic: parseInt(diastolic1),
+      heartRate: parseInt(heartRate1),
     };
 
     const newReading2: BloodPressureReading = {
@@ -69,35 +73,41 @@ export default function Home() {
       time: time + " - 2",
       systolic: parseInt(systolic2),
       diastolic: parseInt(diastolic2),
+          heartRate: parseInt(heartRate2),
     };
 
     setBpData([...bpData, newReading1, newReading2]);
     setSystolic1('');
     setDiastolic1('');
+    setHeartRate1('');
     setSystolic2('');
     setDiastolic2('');
+    setHeartRate2('');
   };
 
   const dailyAverage = () => {
-    if (bpData.length === 0) return { systolic: 0, diastolic: 0 };
+    if (bpData.length === 0) return { systolic: 0, diastolic: 0, heartRate: 0 };
 
     // Filter readings for the selected date
     const dailyReadings = bpData.filter(reading => reading.date === format(date, 'yyyy-MM-dd'));
   
-    if (dailyReadings.length === 0) return { systolic: 0, diastolic: 0 };
+    if (dailyReadings.length === 0) return { systolic: 0, diastolic: 0, heartRate: 0 };
 
     let systolicSum = 0;
     let diastolicSum = 0;
+    let heartRateSum = 0;
 
     dailyReadings.forEach(reading => {
         systolicSum += reading.systolic;
         diastolicSum += reading.diastolic;
+        heartRateSum += reading.heartRate;
     });
 
     const count = dailyReadings.length;
     return {
         systolic: Math.round(systolicSum / count),
-        diastolic: Math.round(diastolicSum / count)
+        diastolic: Math.round(diastolicSum / count),
+        heartRate: Math.round(heartRateSum / count)
     };
   };
 
@@ -111,7 +121,7 @@ export default function Home() {
     <div dir="rtl" className="container mx-auto p-4">
       <Card className="mb-4">
         <CardHeader>
-          <CardTitle>إدخال قراءة ضغط الدم</CardTitle>
+          <CardTitle>إدخال قراءة ضغط الدم ومعدل النبض</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="grid gap-4">
@@ -153,7 +163,7 @@ export default function Home() {
                 ))}
               </select>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-4">
               <div className="grid gap-2">
                 <Label htmlFor="systolic1">انقباضي 1</Label>
                 <Input
@@ -174,8 +184,18 @@ export default function Home() {
                   onChange={(e) => setDiastolic1(e.target.value)}
                 />
               </div>
+                 <div className="grid gap-2">
+                <Label htmlFor="heartRate1">معدل النبض 1</Label>
+                <Input
+                  type="number"
+                  id="heartRate1"
+                  placeholder="معدل النبض 1"
+                  value={heartRate1}
+                  onChange={(e) => setHeartRate1(e.target.value)}
+                />
+              </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-4">
               <div className="grid gap-2">
                 <Label htmlFor="systolic2">انقباضي 2</Label>
                 <Input
@@ -196,6 +216,16 @@ export default function Home() {
                   onChange={(e) => setDiastolic2(e.target.value)}
                 />
               </div>
+               <div className="grid gap-2">
+                <Label htmlFor="heartRate2">معدل النبض 2</Label>
+                <Input
+                  type="number"
+                  id="heartRate2"
+                  placeholder="معدل النبض 2"
+                  value={heartRate2}
+                  onChange={(e) => setHeartRate2(e.target.value)}
+                />
+              </div>
             </div>
             <Button type="submit">أضف القراءات</Button>
           </form>
@@ -204,19 +234,19 @@ export default function Home() {
 
       <Card className="mb-4">
         <CardHeader>
-          <CardTitle>متوسط ضغط الدم اليومي</CardTitle>
+          <CardTitle>متوسط القراءات اليومية</CardTitle>
         </CardHeader>
         <CardContent>
           <p>
             انقباضي: {dailyAverage().systolic} mmHg, انبساطي:{' '}
-            {dailyAverage().diastolic} mmHg
+            {dailyAverage().diastolic} mmHg, معدل النبض: {dailyAverage().heartRate} نبضة/دقيقة
           </p>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader>
-          <CardTitle>اتجاهات ضغط الدم</CardTitle>
+          <CardTitle>اتجاهات القراءات</CardTitle>
         </CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={400}>
@@ -244,6 +274,12 @@ export default function Home() {
                 type="monotone"
                 dataKey="diastolic"
                 stroke="hsl(var(--accent))"
+                activeDot={{ r: 8 }}
+              />
+               <Line
+                type="monotone"
+                dataKey="heartRate"
+                stroke="hsl(var(--chart-2))"
                 activeDot={{ r: 8 }}
               />
             </LineChart>

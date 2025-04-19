@@ -31,6 +31,27 @@ interface BloodPressureReading {
 
 const TIME_OPTIONS = ['الصباح', 'الليل'];
 
+interface CustomTooltipProps {
+  active?: boolean;
+  payload?: any[];
+  label?: string;
+}
+
+const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload, label }) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="p-2 bg-white border rounded shadow-md">
+        <p className="font-bold">{`${label}`}</p>
+        <p className="text-gray-700">{`انقباضي: ${payload[0].value} mmHg`}</p>
+        <p className="text-gray-700">{`انبساطي: ${payload[1].value} mmHg`}</p>
+             <p className="text-gray-700">{`معدل النبض: ${payload[2].value} نبضة/دقيقة`}</p>
+      </div>
+    );
+  }
+
+  return null;
+};
+
 export default function Home() {
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [time, setTime] = useState(TIME_OPTIONS[0]);
@@ -262,7 +283,7 @@ export default function Home() {
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" />
               <YAxis />
-              <Tooltip />
+                <Tooltip content={<CustomTooltip />} />
               <Legend />
               <Line
                 type="monotone"

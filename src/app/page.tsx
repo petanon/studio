@@ -28,7 +28,7 @@ interface BloodPressureReading {
   date: string;
 }
 
-const TIME_OPTIONS = ['Morning', 'Night'];
+const TIME_OPTIONS = ['الصباح', 'الليل'];
 
 export default function Home() {
   const [date, setDate] = useState<Date | undefined>(new Date());
@@ -53,7 +53,7 @@ export default function Home() {
     e.preventDefault();
 
     if (!date || !systolic1 || !diastolic1 || !systolic2 || !diastolic2) {
-      alert('Please fill in all fields.');
+      alert('الرجاء ملء جميع الحقول.');
       return;
     }
 
@@ -108,10 +108,10 @@ export default function Home() {
   }));
 
   return (
-    <div className="container mx-auto p-4">
+    <div dir="rtl" className="container mx-auto p-4">
       <Card className="mb-4">
         <CardHeader>
-          <CardTitle>Enter Blood Pressure Reading</CardTitle>
+          <CardTitle>إدخال قراءة ضغط الدم</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="grid gap-4">
@@ -126,7 +126,7 @@ export default function Home() {
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {date ? format(date, "PPP") : <span>Pick a date</span>}
+                    {date ? format(date, "PPP") : <span>اختر تاريخاً</span>}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
@@ -155,21 +155,21 @@ export default function Home() {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="systolic1">Systolic 1</Label>
+                <Label htmlFor="systolic1">انقباضي 1</Label>
                 <Input
                   type="number"
                   id="systolic1"
-                  placeholder="Systolic 1"
+                  placeholder="انقباضي 1"
                   value={systolic1}
                   onChange={(e) => setSystolic1(e.target.value)}
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="diastolic1">Diastolic 1</Label>
+                <Label htmlFor="diastolic1">انبساطي 1</Label>
                 <Input
                   type="number"
                   id="diastolic1"
-                  placeholder="Diastolic 1"
+                  placeholder="انبساطي 1"
                   value={diastolic1}
                   onChange={(e) => setDiastolic1(e.target.value)}
                 />
@@ -177,38 +177,38 @@ export default function Home() {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="systolic2">Systolic 2</Label>
+                <Label htmlFor="systolic2">انقباضي 2</Label>
                 <Input
                   type="number"
                   id="systolic2"
-                  placeholder="Systolic 2"
+                  placeholder="انقباضي 2"
                   value={systolic2}
                   onChange={(e) => setSystolic2(e.target.value)}
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="diastolic2">Diastolic 2</Label>
+                <Label htmlFor="diastolic2">انبساطي 2</Label>
                 <Input
                   type="number"
                   id="diastolic2"
-                  placeholder="Diastolic 2"
+                  placeholder="انبساطي 2"
                   value={diastolic2}
                   onChange={(e) => setDiastolic2(e.target.value)}
                 />
               </div>
             </div>
-            <Button type="submit">Add Readings</Button>
+            <Button type="submit">أضف القراءات</Button>
           </form>
         </CardContent>
       </Card>
 
       <Card className="mb-4">
         <CardHeader>
-          <CardTitle>Daily Average Blood Pressure</CardTitle>
+          <CardTitle>متوسط ضغط الدم اليومي</CardTitle>
         </CardHeader>
         <CardContent>
           <p>
-            Systolic: {dailyAverage().systolic} mmHg, Diastolic:{' '}
+            انقباضي: {dailyAverage().systolic} mmHg, انبساطي:{' '}
             {dailyAverage().diastolic} mmHg
           </p>
         </CardContent>
@@ -216,7 +216,7 @@ export default function Home() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Blood Pressure Trends</CardTitle>
+          <CardTitle>اتجاهات ضغط الدم</CardTitle>
         </CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={400}>
